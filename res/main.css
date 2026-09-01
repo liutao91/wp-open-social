@@ -234,6 +234,11 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
+.os-login-box .os-google svg,
+.os-login-box .os-x svg {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
 .os-share-box .os-icon {
   font-size: 23px;
 }
@@ -251,4 +256,9 @@
   transform: scale(1.12);
   filter: brightness(1.15);
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.os-login-box .os-google:hover svg,
+.os-login-box .os-x:hover svg {
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
 }
