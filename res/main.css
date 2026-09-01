@@ -229,8 +229,8 @@
   font-size: 32px;
 }
 
-.os-login-box .os-icon svg,
-.os-share-box .os-icon svg {
+.os-login-box .os-icon,
+.os-share-box .os-icon {
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
@@ -250,7 +250,5 @@
 .os-login-box .os-icon:hover {
   transform: scale(1.12);
   filter: brightness(1.15);
-}
-.os-login-box .os-icon:hover svg {
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
