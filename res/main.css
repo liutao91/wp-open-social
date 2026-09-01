@@ -229,7 +229,8 @@
   font-size: 32px;
 }
 
-.os-login-box .os-icon:not(.os-google):not(.os-x) svg {
+.os-login-box .os-icon svg,
+.os-share-box .os-icon svg {
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
