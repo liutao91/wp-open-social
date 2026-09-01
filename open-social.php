@@ -49,7 +49,7 @@ function open_social_init(){
         'baidu'=>array(__('Baidu','open-social'), 'http://developer.baidu.com/console#app/project'),
         'wechat'=>array(__('WeChat Scan','open-social'), '//open.weixin.qq.com/'),
         'google'=>array(__('Google','open-social'), '//console.developers.google.com/'),
-        'live'=>array(__('Microsoft','open-social'), '//apps.dev.microsoft.com/'),
+        'live'=>array(__('Microsoft','open-social'), '//portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade'),
         'facebook'=>array(__('Facebook','open-social'), '//developers.facebook.com/'),
         'github'=>array(__('GitHub','open-social'), '//github.com/settings/developers'),
         'x'=>array(__('X','open-social'), '//developer.x.com/en/apps'),
@@ -1418,10 +1418,11 @@ class WPOS_LIVE_CLASS {
             'response_type'=>'code',
             'client_id'=>$info['akey'],
             'redirect_uri'=>$info['cburl'],
-            'scope'=>'wl.signin wl.basic wl.emails',
+            'scope'=>'openid profile email offline_access User.Read',
+            'response_mode'=>'query',
             'state'=>$state
         );
-        open_social_next('https://login.live.com/oauth20_authorize.srf?'.http_build_query($params));
+        open_social_next('https://login.microsoftonline.com/common/oauth2/v2.0/authorize?'.http_build_query($params));
     } 
     function open_callback($code, $info) {
         $params=array(
@@ -1429,19 +1430,25 @@ class WPOS_LIVE_CLASS {
             'code'=>$code,
             'client_id'=>$info['akey'],
             'client_secret'=>$info['skey'],
-            'redirect_uri'=>$info['cburl']
+            'redirect_uri'=>$info['cburl'],
+            'scope'=>'openid profile email offline_access User.Read'
         );
-        $str = open_social_http('https://login.live.com/oauth20_token.srf', array('method'=>'POST', 'body'=>$params));
+        $str = open_social_http('https://login.microsoftonline.com/common/oauth2/v2.0/token', array('method'=>'POST', 'body'=>$params));
         open_social_check($str,$code,'access_token');
         $_SESSION['access_token'] = $str['access_token'];
+        if(!empty($str['refresh_token'])) $_SESSION['refresh_token'] = $str['refresh_token'];
     }
     function open_new_user($info){
-        $user = open_social_http('https://apis.live.net/v5.0/me');
+        $header = array('Authorization'=>'Bearer '.$_SESSION['access_token'], 'Accept'=>'application/json');
+        $user = open_social_http('https://graph.microsoft.com/v1.0/me?$select=id,displayName,mail,userPrincipalName', array('headers'=>$header));
         open_social_check($user,$_SESSION['access_token'],'id');
         $_SESSION['open_id'] = $user['id'];
-        $_SESSION['open_img'] = 'https://storage.live.com/Users/0x'.$_SESSION['open_id'].'/MyProfile/ExpressionProfile/ProfilePhoto:UserTileStatic';
-        $email = isset($user['emails']['preferred']) ? $user['emails']['preferred'] : $user['emails']['account'];
-        return array('nickname'=>$user['name'], 'user_url'=>'', 'user_email'=>$email);
+        $photo = open_social_http('https://graph.microsoft.com/v1.0/me/photo/$value', array('headers'=>$header));
+        if(is_string($photo) && !empty($photo)) $_SESSION['open_img'] = $photo;
+        $email = '';
+        if(isset($user['mail']) && $user['mail']) $email = $user['mail'];
+        else if(isset($user['userPrincipalName']) && $user['userPrincipalName']) $email = $user['userPrincipalName'];
+        return array('nickname'=>isset($user['displayName']) ? $user['displayName'] : '', 'user_url'=>'', 'user_email'=>$email);
     }
 } 
 
